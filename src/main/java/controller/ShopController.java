@@ -7,7 +7,6 @@ import io.datafx.controller.flow.action.ActionMethod;
 import io.datafx.controller.flow.action.ActionTrigger;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.util.Callback;
 import javafx.util.converter.NumberStringConverter;
 import model.GoodsMove;
 import model.Product;
@@ -18,7 +17,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -36,7 +34,7 @@ public class ShopController {
     private TableColumn<Product, Float> priceColumn;
 
     @FXML
-    private TableColumn<Product, Float> countColumn;
+    private TableColumn<Product, Long> countColumn;
 
     @FXML
     private ListView<GoodsMove> goodsMovementList;
@@ -84,7 +82,8 @@ public class ShopController {
     private void init() {
         goodsTable.setItems(stock.getGoods());
         nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
-        priceColumn.setCellValueFactory(cellData -> cellData.getValue().basePriceProperty().asObject());
+        priceColumn.setCellValueFactory(cellData -> cellData.getValue().priceProperty().asObject());
+        countColumn.setCellValueFactory(cellData -> cellData.getValue().countProperty().asObject());
 
         goodsMovementList.setItems(stock.getGoodsMoves());
 

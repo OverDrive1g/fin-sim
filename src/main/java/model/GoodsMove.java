@@ -27,6 +27,6 @@ public class GoodsMove {
 
     @Override
     public String toString() {
-        return String.format("%s %s * %d", action == Action.BUY? "-":"+", product.getName(), count);
+        return String.format("%s %s * %d", action == Action.BUY? "+":"-", product.getName(), count);
     }
 }
