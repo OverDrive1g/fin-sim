@@ -107,11 +107,9 @@ public class ShopController {
 
     @ActionMethod("accept")
     public void acceptClick(){
-        // TODO: 28.02.2018 refactor and split on func and methods
         Product selectedProduct = productMenu.getSelectionModel().getSelectedItem();
 
-        String rowStr = quantityOfProduct.getText().replace( ",", "");
-        long count = Long.parseLong(rowStr);
+        long count = parceLongFromInput(quantityOfProduct.getText());
 
         if(selectedProduct == null){
             System.err.println("Ошибка, выберите продукт!");
@@ -130,6 +128,11 @@ public class ShopController {
 
         quantityOfProduct.setText("");
         acceptBtn.setDisable(true);
+    }
+
+    private Long parceLongFromInput(String input){
+        String rowStr = input.replace( ",", "");
+        return Long.parseLong(rowStr);
     }
 
     @FXML
