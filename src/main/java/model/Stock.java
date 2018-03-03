@@ -27,6 +27,7 @@ public class Stock {
 
             this.allSentence += 1000L;
             this.goods.add(product);
+            this.goodsMoves.add(new GoodsMove(product, 1000L, GoodsMove.Action.SALE));
         }
     }
 
@@ -36,20 +37,21 @@ public class Stock {
                     goodsMove.getProduct().getName().equals(p.getName()));
 
             long demand = 0;
-            for(GoodsMove gm: filteredList){
+            for (GoodsMove gm : filteredList) {
                 if (gm.getAction() == GoodsMove.Action.SALE)
                     demand += gm.getCount();
             }
 
-            if (p.getCount() == 0 || demand == 0)
+            if (p.getCount() == 0 || demand == 0) {
+                p.setPrice(p.getBasePrice());
                 continue;
-
-            p.setPrice(p.getBasePrice() * (getAllDemand() / demand) / (allSentence / p.getSentence()));
+            }
+            p.setPrice(p.getBasePrice() * ((float)demand / (float)getAllDemand()) / ((float)p.getSentence() / (float)allSentence));
         }
     }
 
     public void sellGood(Product product, long count) {
-        if (count > product.getCount()){
+        if (count > product.getCount()) {
             System.err.println("Ошибка, кол-во не может быть больше чем на \"складе\"");
             return;
         }
@@ -73,11 +75,11 @@ public class Stock {
         return goodsMoves;
     }
 
-    private long getAllDemand(){
+    private long getAllDemand() {
         long result = 0L;
 
-        for (GoodsMove gm:goodsMoves) {
-            result += gm.getAction() == GoodsMove.Action.SALE ? gm.getCount():0L;
+        for (GoodsMove gm : goodsMoves) {
+            result += gm.getAction() == GoodsMove.Action.SALE ? gm.getCount() : 0L;
         }
 
         return result;

@@ -37,6 +37,9 @@ public class ShopController {
     private TableColumn<Product, Long> countColumn;
 
     @FXML
+    private TableColumn<Product, Float> basePriceColumn;
+
+    @FXML
     private ListView<GoodsMove> goodsMovementList;
 
     @FXML
@@ -84,6 +87,7 @@ public class ShopController {
         nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
         priceColumn.setCellValueFactory(cellData -> cellData.getValue().priceProperty().asObject());
         countColumn.setCellValueFactory(cellData -> cellData.getValue().countProperty().asObject());
+        basePriceColumn.setCellValueFactory(cellData -> cellData.getValue().basePriceProperty().asObject());
 
         goodsMovementList.setItems(stock.getGoodsMoves());
 
