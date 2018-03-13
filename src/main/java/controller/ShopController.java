@@ -19,7 +19,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 @ViewController(value = "/view/shopView.fxml", title = "Магазин")
 public class ShopController {
@@ -61,8 +60,6 @@ public class ShopController {
     private Stock stock;
 
     public ShopController() {
-        // TODO: 28.02.2018 add load from database
-        // TODO: 28.02.2018 loading start items from json
         StringBuilder json = new StringBuilder();
         ClassLoader classLoader = getClass().getClassLoader();
         File file = new File(classLoader.getResource("items.json").getFile());
@@ -76,8 +73,7 @@ public class ShopController {
             e.printStackTrace();
         }
         Gson gson = new Gson();
-        List<Map<String, String>> items = gson.fromJson(json.toString(), new TypeToken<List<Map<String, String>>>(){}.getType());
-
+        List<Product.RawProduct> items = gson.fromJson(json.toString(), new TypeToken<List<Product.RawProduct>>(){}.getType());
         stock = new Stock(items);
     }
 
@@ -87,7 +83,7 @@ public class ShopController {
         nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
         priceColumn.setCellValueFactory(cellData -> cellData.getValue().priceProperty().asObject());
         countColumn.setCellValueFactory(cellData -> cellData.getValue().countProperty().asObject());
-        basePriceColumn.setCellValueFactory(cellData -> cellData.getValue().basePriceProperty().asObject());
+        basePriceColumn.setCellValueFactory(cellData -> cellData.getValue().getType().basePriceProperty().asObject());
 
         goodsMovementList.setItems(stock.getGoodsMoves());
 

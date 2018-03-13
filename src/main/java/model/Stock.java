@@ -5,48 +5,59 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 
 import java.util.List;
-import java.util.Map;
 
 public class Stock {
     private ObservableList<Product> goods;
     private ObservableList<GoodsMove> goodsMoves;
-    private long allSentence = 0;
-
 
     private Stock() {
         this.goods = FXCollections.observableArrayList();
         this.goodsMoves = FXCollections.observableArrayList();
     }
 
-    public Stock(List<Map<String, String>> products) {
+    public Stock(List<Product.RawProduct> products) {
         this();
 
-        for (Map<String, String> i : products) {
-            Product product = new Product(Long.parseLong(i.get("id")), i.get("name"),
-                    Float.parseFloat(i.get("basePrice")), 1000L, 1000L);
+        for (Product.RawProduct rp : products) {
+            Type type = new Type(rp.getName(), rp.getBasePrice());
+            for (Product.Item i : rp.getItems()) {
+                Product product = new Product(i.getId(), String.format("%s [%s]", rp.getName(), i.getSpecificity()), rp.getBasePrice(), 1000L,
+                        1000L, type);
 
-            this.allSentence += 1000L;
-            this.goods.add(product);
-            this.goodsMoves.add(new GoodsMove(product, 1000L, GoodsMove.Action.SALE));
+                type.incSentence(1000L);
+
+                this.goods.add(product);
+                this.goodsMoves.add(new GoodsMove(product, 1000L, GoodsMove.Action.BUY));
+            }
         }
     }
 
-    private void recalculationPrice() {
-        for (Product p : goods) {
-            FilteredList<GoodsMove> filteredList = goodsMoves.filtered(goodsMove ->
-                    goodsMove.getProduct().getName().equals(p.getName()));
+    private void recalculationPrice(Type type) {
+        if (type != null) {
+            FilteredList<Product> filteredProducts = goods.filtered(product ->
+                    product.getType().getName().equals(type.getName()));
 
-            long demand = 0;
-            for (GoodsMove gm : filteredList) {
-                if (gm.getAction() == GoodsMove.Action.SALE)
-                    demand += gm.getCount();
-            }
+            FilteredList<GoodsMove> fgm = goodsMoves.filtered(goodsMove ->
+                    goodsMove.getAction() == GoodsMove.Action.SALE &&
+                            goodsMove.getProduct().getType().getName().equals(type.getName()));
 
-            if (p.getCount() == 0 || demand == 0) {
-                p.setPrice(p.getBasePrice());
-                continue;
+            for (Product p :filteredProducts) {
+
+                long demand = 0;
+                FilteredList<GoodsMove> fg = fgm.filtered(goodsMove -> goodsMove.getProduct().getName().equals(p.getName()));
+                for (GoodsMove g : fg) {
+                    demand += g.getCount();
+                }
+
+                float basePrice = p.getType().getBasePrice();
+                if (p.getCount() == 0 || demand == 0) {
+                    p.setPrice(basePrice);
+                    continue;
+                }
+
+                p.setPrice(basePrice * ((float) demand / (float) p.getType().getAllDemand()) / ((float) p.getSentence() / (float) p.getType().getAllSentence()));
+
             }
-            p.setPrice(p.getBasePrice() * ((float)demand / (float)getAllDemand()) / ((float)p.getSentence() / (float)allSentence));
         }
     }
 
@@ -56,15 +67,18 @@ public class Stock {
             return;
         }
         product.setCount(product.getCount() - count);
+        product.getType().decSentence(count);
+        product.getType().incDemand(count);
         this.goodsMoves.add(new GoodsMove(product, count, GoodsMove.Action.SALE));
 
-        this.recalculationPrice();
+        this.recalculationPrice(product.getType());
     }
 
     public void buyGood(Product product, long count) {
         product.setCount(product.getCount() + count);
+        product.getType().incSentence(count);
         this.goodsMoves.add(new GoodsMove(product, count, GoodsMove.Action.BUY));
-        this.recalculationPrice();
+        this.recalculationPrice(product.getType());
     }
 
     public ObservableList<Product> getGoods() {
@@ -73,15 +87,5 @@ public class Stock {
 
     public ObservableList<GoodsMove> getGoodsMoves() {
         return goodsMoves;
-    }
-
-    private long getAllDemand() {
-        long result = 0L;
-
-        for (GoodsMove gm : goodsMoves) {
-            result += gm.getAction() == GoodsMove.Action.SALE ? gm.getCount() : 0L;
-        }
-
-        return result;
     }
 }

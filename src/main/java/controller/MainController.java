@@ -36,7 +36,5 @@ public class MainController {
 
         centerPane.getChildren().add(flowHandler.start(
                 new AnimatedFlowContainer(Duration.millis(320), ContainerAnimations.ZOOM_IN)));
-
-        // TODO: 28.02.2018 on close save store_obj to database
     }
 }
